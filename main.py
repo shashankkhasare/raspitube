@@ -72,7 +72,7 @@ class NavItem(ButtonBehavior, BoxLayout):
             self.bg_rect = Rectangle(pos=self.pos, size=self.size)
 
 
-class RaspyTubeApp(MDApp):
+class RaspiTubeApp(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.youtube_api = YouTubeAPI()
@@ -121,7 +121,7 @@ class RaspyTubeApp(MDApp):
         menu_button.add_widget(menu_icon)
 
         logo_label = Label(
-            text="RaspyTube",
+            text="RaspiTube",
             font_size="20sp",
             color=(0.067, 0.067, 0.067, 1),
             size_hint_x=None,
@@ -377,4 +377,4 @@ class RaspyTubeApp(MDApp):
 
 
 if __name__ == "__main__":
-    RaspyTubeApp().run()
+    RaspiTubeApp().run()
