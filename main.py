@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import kivy
-from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.logger import Logger
@@ -12,6 +11,8 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.scrollview import ScrollView
+from kivymd.app import MDApp
+from kivymd.uix.label import MDIcon
 
 from ui_components import SearchBar, VideoCard
 from video_player import VideoPlayer
@@ -37,11 +38,10 @@ class NavItem(ButtonBehavior, BoxLayout):
 
         self.bind(pos=self.update_bg, size=self.update_bg)
 
-        icon_label = Label(
-            text=icon,
+        icon_label = MDIcon(
+            icon=icon,
             size_hint_x=None,
             width=32,
-            color=(0.067, 0.067, 0.067, 1),
             font_size="18sp",
         )
         text_label = Label(
@@ -72,7 +72,7 @@ class NavItem(ButtonBehavior, BoxLayout):
             self.bg_rect = Rectangle(pos=self.pos, size=self.size)
 
 
-class RaspyTubeApp(App):
+class RaspyTubeApp(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.youtube_api = YouTubeAPI()
@@ -105,13 +105,17 @@ class RaspyTubeApp(App):
         )
 
         menu_button = Button(
-            text="☰",
             size_hint_x=None,
             width=40,
             background_color=(0, 0, 0, 0),
             color=(0.067, 0.067, 0.067, 1),
             font_size="18sp",
         )
+        menu_icon = MDIcon(
+            icon="menu",
+            font_size="18sp",
+        )
+        menu_button.add_widget(menu_icon)
 
         logo_label = Label(
             text="RaspyTube",
@@ -137,31 +141,43 @@ class RaspyTubeApp(App):
         )
 
         create_button = Button(
-            text="📹",
             size_hint_x=None,
             width=40,
             background_color=(0, 0, 0, 0),
             color=(0.067, 0.067, 0.067, 1),
             font_size="16sp",
         )
+        create_icon = MDIcon(
+            icon="video",
+            font_size="16sp",
+        )
+        create_button.add_widget(create_icon)
 
         notifications_button = Button(
-            text="🔔",
             size_hint_x=None,
             width=40,
             background_color=(0, 0, 0, 0),
             color=(0.067, 0.067, 0.067, 1),
             font_size="16sp",
         )
+        notifications_icon = MDIcon(
+            icon="bell",
+            font_size="16sp",
+        )
+        notifications_button.add_widget(notifications_icon)
 
         profile_button = Button(
-            text="👤",
             size_hint_x=None,
             width=32,
             background_color=(0.2, 0.4, 0.8, 1),
             color=(1, 1, 1, 1),
             font_size="16sp",
         )
+        profile_icon = MDIcon(
+            icon="account",
+            font_size="16sp",
+        )
+        profile_button.add_widget(profile_icon)
 
         right_icons.add_widget(create_button)
         right_icons.add_widget(notifications_button)
@@ -184,9 +200,9 @@ class RaspyTubeApp(App):
             Rectangle(pos=sidebar.pos, size=sidebar.size)
 
         sidebar_items = [
-            ("🏠", "Home"),
-            ("🔥", "Trending"),
-            ("📜", "History"),
+            ("home", "Home"),
+            ("trending-up", "Trending"),
+            ("history", "History"),
         ]
 
         for icon, text in sidebar_items:
