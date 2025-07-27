@@ -80,7 +80,6 @@ class VideoPlayer:
         vlc_cmd = [
             'vlc',
             video_url,
-            '--intf', 'dummy',
             '--extraintf', 'http',
             '--http-password', 'raspytube',
             '--http-port', '8080',
