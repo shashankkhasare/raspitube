@@ -8,6 +8,7 @@ from kivy.uix.button import Button
 from kivy.uix.image import AsyncImage
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
+from kivymd.uix.label import MDIcon
 
 
 class SearchBar(BoxLayout):
@@ -33,12 +34,14 @@ class SearchBar(BoxLayout):
         self.search_input.bind(on_text_validate=self.on_enter)
 
         search_button = Button(
-            text="🔍",
             size_hint_x=0.15,
             background_color=(0.93, 0.93, 0.93, 1),
-            color=(0.4, 0.4, 0.4, 1),
-            font_size="16sp",
         )
+        search_icon = MDIcon(
+            icon="magnify",
+            font_size="18sp",
+        )
+        search_button.add_widget(search_icon)
         search_button.bind(on_press=self.on_search_press)
 
         self.add_widget(self.search_input)
