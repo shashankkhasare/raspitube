@@ -111,7 +111,7 @@ class VideoCard(ButtonBehavior, BoxLayout):
         self.rect.pos = instance.pos
         self.rect.size = instance.size
 
-    def on_video_press(self):
+    def on_video_press(self, instance):
         self.dispatch('on_video_select', self.video_data)
 
     def on_video_select(self, video_data):
