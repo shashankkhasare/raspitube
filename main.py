@@ -80,6 +80,9 @@ class RaspyTubeApp(MDApp):
         self.video_history = []
         self.current_view = "home"
         self.nav_buttons = {}
+        self.videos_per_page = 12
+        self.current_page = 1
+        self.all_videos = []
 
     def build(self):
         Window.maximize()
@@ -179,7 +182,47 @@ class RaspyTubeApp(MDApp):
         scroll_view = ScrollView()
         scroll_view.add_widget(self.video_grid)
 
+        # Pagination controls
+        self.pagination_layout = BoxLayout(
+            orientation="horizontal",
+            size_hint_y=None,
+            height=50,
+            spacing=10,
+            padding=[0, 10, 0, 10],
+        )
+
+        self.prev_button = Button(
+            text="Previous",
+            size_hint_x=None,
+            width=100,
+            background_color=(0.2, 0.4, 0.8, 1),
+            color=(1, 1, 1, 1),
+        )
+        self.prev_button.bind(on_press=self.prev_page)
+
+        self.page_label = Label(
+            text=f"Page {self.current_page}",
+            color=(0.067, 0.067, 0.067, 1),
+            font_size="16sp",
+        )
+
+        self.next_button = Button(
+            text="Next",
+            size_hint_x=None,
+            width=100,
+            background_color=(0.2, 0.4, 0.8, 1),
+            color=(1, 1, 1, 1),
+        )
+        self.next_button.bind(on_press=self.next_page)
+
+        self.pagination_layout.add_widget(self.prev_button)
+        self.pagination_layout.add_widget(self.page_label)
+        self.pagination_layout.add_widget(self.next_button)
+        spacer = Label(text="")
+        self.pagination_layout.add_widget(spacer)
+
         main_content.add_widget(scroll_view)
+        main_content.add_widget(self.pagination_layout)
 
         content_layout.add_widget(sidebar)
         content_layout.add_widget(main_content)
@@ -197,6 +240,7 @@ class RaspyTubeApp(MDApp):
 
     def search_videos(self, query):
         try:
+            self.current_page = 1  # Reset to first page
             videos = self.youtube_api.search_videos(query)
             self.display_videos(videos)
         except Exception as e:
@@ -205,6 +249,7 @@ class RaspyTubeApp(MDApp):
 
     def load_trending_videos(self, dt):
         try:
+            self.current_page = 1  # Reset to first page
             videos = self.youtube_api.get_trending_videos()
             self.display_videos(videos)
         except Exception as e:
@@ -212,12 +257,47 @@ class RaspyTubeApp(MDApp):
             self.show_error("Failed to load trending videos.")
 
     def display_videos(self, videos):
+        self.all_videos = videos
+        self.update_video_display()
+
+    def update_video_display(self):
         self.video_grid.clear_widgets()
 
-        for video in videos:
+        start_index = (self.current_page - 1) * self.videos_per_page
+        end_index = start_index + self.videos_per_page
+        page_videos = self.all_videos[start_index:end_index]
+
+        for video in page_videos:
             video_card = VideoCard(video)
             video_card.bind(on_video_select=self.play_video)
             self.video_grid.add_widget(video_card)
+
+        self.update_pagination_controls()
+
+    def update_pagination_controls(self):
+        total_pages = (
+            (len(self.all_videos) - 1) // self.videos_per_page + 1
+            if self.all_videos
+            else 1
+        )
+        self.page_label.text = f"Page {self.current_page} of {total_pages}"
+        self.prev_button.disabled = self.current_page <= 1
+        self.next_button.disabled = self.current_page >= total_pages
+
+    def prev_page(self, instance):
+        if self.current_page > 1:
+            self.current_page -= 1
+            self.update_video_display()
+
+    def next_page(self, instance):
+        total_pages = (
+            (len(self.all_videos) - 1) // self.videos_per_page + 1
+            if self.all_videos
+            else 1
+        )
+        if self.current_page < total_pages:
+            self.current_page += 1
+            self.update_video_display()
 
     def play_video(self, video_card, video_data):
         try:
@@ -243,6 +323,7 @@ class RaspyTubeApp(MDApp):
 
     def load_home_videos(self):
         try:
+            self.current_page = 1  # Reset to first page
             videos = self.youtube_api.get_trending_videos()
             self.display_videos(videos)
         except Exception as e:
@@ -250,6 +331,7 @@ class RaspyTubeApp(MDApp):
             self.show_error("Failed to load home videos.")
 
     def load_history_videos(self):
+        self.current_page = 1  # Reset to first page
         if not self.video_history:
             self.video_grid.clear_widgets()
             no_history_label = Label(
