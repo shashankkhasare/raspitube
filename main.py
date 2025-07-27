@@ -136,58 +136,10 @@ class RaspyTubeApp(MDApp):
         self.search_bar.bind(on_search=self.on_search)
         search_container.add_widget(self.search_bar)
 
-        right_icons = BoxLayout(
-            orientation="horizontal", size_hint_x=None, width=120, spacing=8
-        )
-
-        create_button = Button(
-            size_hint_x=None,
-            width=40,
-            background_color=(0, 0, 0, 0),
-            color=(0.067, 0.067, 0.067, 1),
-            font_size="16sp",
-        )
-        create_icon = MDIcon(
-            icon="video",
-            font_size="16sp",
-        )
-        create_button.add_widget(create_icon)
-
-        notifications_button = Button(
-            size_hint_x=None,
-            width=40,
-            background_color=(0, 0, 0, 0),
-            color=(0.067, 0.067, 0.067, 1),
-            font_size="16sp",
-        )
-        notifications_icon = MDIcon(
-            icon="bell",
-            font_size="16sp",
-        )
-        notifications_button.add_widget(notifications_icon)
-
-        profile_button = Button(
-            size_hint_x=None,
-            width=32,
-            background_color=(0.2, 0.4, 0.8, 1),
-            color=(1, 1, 1, 1),
-            font_size="16sp",
-        )
-        profile_icon = MDIcon(
-            icon="account",
-            font_size="16sp",
-        )
-        profile_button.add_widget(profile_icon)
-
-        right_icons.add_widget(create_button)
-        right_icons.add_widget(notifications_button)
-        right_icons.add_widget(profile_button)
-
         header_layout.add_widget(logo_layout)
         header_layout.add_widget(Label(text="", size_hint_x=0.3))
         header_layout.add_widget(search_container)
-        header_layout.add_widget(Label(text="", size_hint_x=0.3))
-        header_layout.add_widget(right_icons)
+        header_layout.add_widget(Label(text="", size_hint_x=0.6))
 
         content_layout = BoxLayout(orientation="horizontal", spacing=0)
 
