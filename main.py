@@ -8,11 +8,9 @@ from kivy.logger import Logger
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.image import AsyncImage
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.scrollview import ScrollView
-from kivy.uix.textinput import TextInput
 
 from ui_components import SearchBar, VideoCard
 from video_player import VideoPlayer
@@ -47,7 +45,7 @@ class RaspyTubeApp(App):
             Rectangle(pos=header_layout.pos, size=header_layout.size)
 
         logo_layout = BoxLayout(
-            orientation="horizontal", size_hint_x=None, width=120, spacing=8
+            orientation="horizontal", size_hint_x=None, width=150, spacing=8
         )
 
         menu_button = Button(
@@ -60,11 +58,11 @@ class RaspyTubeApp(App):
         )
 
         logo_label = Label(
-            text="YouTube",
+            text="RaspyTube",
             font_size="20sp",
             color=(0.067, 0.067, 0.067, 1),
             size_hint_x=None,
-            width=72,
+            width=100,
             bold=True,
         )
 
@@ -132,24 +130,31 @@ class RaspyTubeApp(App):
         sidebar_items = [
             ("🏠", "Home"),
             ("🔥", "Trending"),
-            ("📚", "Subscriptions"),
-            ("📖", "Library"),
             ("📜", "History"),
-            ("⏰", "Watch Later"),
-            ("👍", "Liked videos"),
         ]
 
         for icon, text in sidebar_items:
             item_layout = BoxLayout(
                 orientation="horizontal",
                 size_hint_y=None,
-                height=40,
-                padding=[16, 0, 16, 0],
+                height=48,
+                padding=[20, 8, 16, 8],
+                spacing=12,
             )
             icon_label = Label(
-                text=icon, size_hint_x=None, width=24, color=(0.067, 0.067, 0.067, 1)
+                text=icon,
+                size_hint_x=None,
+                width=32,
+                color=(0.067, 0.067, 0.067, 1),
+                font_size="18sp",
             )
-            text_label = Label(text=text, halign="left", color=(0.067, 0.067, 0.067, 1))
+            text_label = Label(
+                text=text,
+                halign="left",
+                valign="center",
+                color=(0.067, 0.067, 0.067, 1),
+                font_size="15sp",
+            )
             text_label.bind(size=text_label.setter("text_size"))
             item_layout.add_widget(icon_label)
             item_layout.add_widget(text_label)
