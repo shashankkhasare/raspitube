@@ -2,70 +2,185 @@
 
 import kivy
 from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.textinput import TextInput
-from kivy.uix.button import Button
-from kivy.uix.label import Label
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.image import AsyncImage
-from kivy.uix.popup import Popup
 from kivy.clock import Clock
-from kivy.logger import Logger
 from kivy.core.window import Window
+from kivy.logger import Logger
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.image import AsyncImage
+from kivy.uix.label import Label
+from kivy.uix.popup import Popup
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.textinput import TextInput
 
-from youtube_api import YouTubeAPI
+from ui_components import SearchBar, VideoCard
 from video_player import VideoPlayer
-from ui_components import VideoCard, SearchBar
+from youtube_api import YouTubeAPI
 
-kivy.require('2.0.0')
+kivy.require("2.0.0")
+
 
 class RaspyTubeApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.youtube_api = YouTubeAPI()
         self.video_player = VideoPlayer()
-        
+
     def build(self):
         Window.size = (1024, 600)
-        Window.clearcolor = (0.05, 0.05, 0.05, 1)
-        
-        main_layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
-        
-        header_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=60)
-        
-        logo_label = Label(
-            text='RaspyTube',
-            font_size='24sp',
-            color=(1, 0, 0, 1),
-            size_hint_x=None,
-            width=150,
-            bold=True
+        Window.clearcolor = (1, 1, 1, 1)
+
+        main_layout = BoxLayout(orientation="vertical", spacing=0, padding=0)
+
+        header_layout = BoxLayout(
+            orientation="horizontal",
+            size_hint_y=None,
+            height=56,
+            padding=[16, 0, 16, 0],
         )
-        
+        header_layout.canvas.before.clear()
+        with header_layout.canvas.before:
+            from kivy.graphics import Color, Rectangle
+
+            Color(1, 1, 1, 1)
+            Rectangle(pos=header_layout.pos, size=header_layout.size)
+
+        logo_layout = BoxLayout(
+            orientation="horizontal", size_hint_x=None, width=120, spacing=8
+        )
+
+        menu_button = Button(
+            text="☰",
+            size_hint_x=None,
+            width=40,
+            background_color=(0, 0, 0, 0),
+            color=(0.067, 0.067, 0.067, 1),
+            font_size="18sp",
+        )
+
+        logo_label = Label(
+            text="YouTube",
+            font_size="20sp",
+            color=(0.067, 0.067, 0.067, 1),
+            size_hint_x=None,
+            width=72,
+            bold=True,
+        )
+
+        logo_layout.add_widget(menu_button)
+        logo_layout.add_widget(logo_label)
+
+        search_container = BoxLayout(
+            orientation="horizontal", size_hint_x=0.4, spacing=0
+        )
         self.search_bar = SearchBar()
         self.search_bar.bind(on_search=self.on_search)
-        
-        header_layout.add_widget(logo_label)
-        header_layout.add_widget(self.search_bar)
-        
-        self.video_grid = GridLayout(cols=3, spacing=10, size_hint_y=None)
-        self.video_grid.bind(minimum_height=self.video_grid.setter('height'))
-        
+        search_container.add_widget(self.search_bar)
+
+        right_icons = BoxLayout(
+            orientation="horizontal", size_hint_x=None, width=120, spacing=8
+        )
+
+        create_button = Button(
+            text="📹",
+            size_hint_x=None,
+            width=40,
+            background_color=(0, 0, 0, 0),
+            color=(0.067, 0.067, 0.067, 1),
+            font_size="16sp",
+        )
+
+        notifications_button = Button(
+            text="🔔",
+            size_hint_x=None,
+            width=40,
+            background_color=(0, 0, 0, 0),
+            color=(0.067, 0.067, 0.067, 1),
+            font_size="16sp",
+        )
+
+        profile_button = Button(
+            text="👤",
+            size_hint_x=None,
+            width=32,
+            background_color=(0.2, 0.4, 0.8, 1),
+            color=(1, 1, 1, 1),
+            font_size="16sp",
+        )
+
+        right_icons.add_widget(create_button)
+        right_icons.add_widget(notifications_button)
+        right_icons.add_widget(profile_button)
+
+        header_layout.add_widget(logo_layout)
+        header_layout.add_widget(Label(text="", size_hint_x=0.3))
+        header_layout.add_widget(search_container)
+        header_layout.add_widget(Label(text="", size_hint_x=0.3))
+        header_layout.add_widget(right_icons)
+
+        content_layout = BoxLayout(orientation="horizontal", spacing=0)
+
+        sidebar = BoxLayout(
+            orientation="vertical", size_hint_x=None, width=240, padding=[0, 12, 0, 0]
+        )
+        sidebar.canvas.before.clear()
+        with sidebar.canvas.before:
+            Color(0.97, 0.97, 0.97, 1)
+            Rectangle(pos=sidebar.pos, size=sidebar.size)
+
+        sidebar_items = [
+            ("🏠", "Home"),
+            ("🔥", "Trending"),
+            ("📚", "Subscriptions"),
+            ("📖", "Library"),
+            ("📜", "History"),
+            ("⏰", "Watch Later"),
+            ("👍", "Liked videos"),
+        ]
+
+        for icon, text in sidebar_items:
+            item_layout = BoxLayout(
+                orientation="horizontal",
+                size_hint_y=None,
+                height=40,
+                padding=[16, 0, 16, 0],
+            )
+            icon_label = Label(
+                text=icon, size_hint_x=None, width=24, color=(0.067, 0.067, 0.067, 1)
+            )
+            text_label = Label(text=text, halign="left", color=(0.067, 0.067, 0.067, 1))
+            text_label.bind(size=text_label.setter("text_size"))
+            item_layout.add_widget(icon_label)
+            item_layout.add_widget(text_label)
+            sidebar.add_widget(item_layout)
+
+        main_content = BoxLayout(orientation="vertical", padding=[24, 12, 24, 0])
+
+        self.video_grid = GridLayout(
+            cols=4, spacing=16, size_hint_y=None, padding=[0, 0, 0, 24]
+        )
+        self.video_grid.bind(minimum_height=self.video_grid.setter("height"))
+
         scroll_view = ScrollView()
         scroll_view.add_widget(self.video_grid)
-        
+
+        main_content.add_widget(scroll_view)
+
+        content_layout.add_widget(sidebar)
+        content_layout.add_widget(main_content)
+
         main_layout.add_widget(header_layout)
-        main_layout.add_widget(scroll_view)
-        
+        main_layout.add_widget(content_layout)
+
         Clock.schedule_once(self.load_trending_videos, 1)
-        
+
         return main_layout
-    
+
     def on_search(self, search_bar, query):
         if query.strip():
             self.search_videos(query)
-    
+
     def search_videos(self, query):
         try:
             videos = self.youtube_api.search_videos(query)
@@ -73,7 +188,7 @@ class RaspyTubeApp(App):
         except Exception as e:
             Logger.error(f"Search error: {e}")
             self.show_error("Search failed. Please check your internet connection.")
-    
+
     def load_trending_videos(self, dt):
         try:
             videos = self.youtube_api.get_trending_videos()
@@ -81,29 +196,26 @@ class RaspyTubeApp(App):
         except Exception as e:
             Logger.error(f"Trending videos error: {e}")
             self.show_error("Failed to load trending videos.")
-    
+
     def display_videos(self, videos):
         self.video_grid.clear_widgets()
-        
+
         for video in videos:
             video_card = VideoCard(video)
             video_card.bind(on_video_select=self.play_video)
             self.video_grid.add_widget(video_card)
-    
+
     def play_video(self, video_card, video_data):
         try:
-            self.video_player.play_video(video_data['video_id'])
+            self.video_player.play_video(video_data["video_id"])
         except Exception as e:
             Logger.error(f"Video playback error: {e}")
             self.show_error("Failed to play video.")
-    
+
     def show_error(self, message):
-        popup = Popup(
-            title='Error',
-            content=Label(text=message),
-            size_hint=(0.6, 0.4)
-        )
+        popup = Popup(title="Error", content=Label(text=message), size_hint=(0.6, 0.4))
         popup.open()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     RaspyTubeApp().run()
