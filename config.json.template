@@ -1,0 +1,11 @@
+{
+    "youtube_api_key": "YOUR_YOUTUBE_API_KEY_HERE",
+    "preferred_player": "vlc",
+    "video_quality": "720p",
+    "cache_thumbnails": true,
+    "safe_search": "moderate",
+    "default_region": "US",
+    "ui_theme": "dark",
+    "fullscreen_on_play": false,
+    "auto_play_next": false
+}
