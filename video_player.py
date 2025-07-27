@@ -33,14 +33,18 @@ class VideoPlayer:
         
         self.current_video_id = video_id
         
-        try:
-            video_url = self._get_video_url(video_id)
-            if video_url:
-                self._start_player(video_url, start_time)
-            else:
-                Logger.error("Failed to get video URL")
-        except Exception as e:
-            Logger.error(f"Error playing video: {e}")
+        # Start video URL extraction and player launch in background thread
+        def launch_video():
+            try:
+                video_url = self._get_video_url(video_id)
+                if video_url:
+                    self._start_player(video_url, start_time)
+                else:
+                    Logger.error("Failed to get video URL")
+            except Exception as e:
+                Logger.error(f"Error playing video: {e}")
+        
+        threading.Thread(target=launch_video, daemon=True).start()
     
     def _get_video_url(self, video_id: str) -> Optional[str]:
         try:
@@ -85,7 +89,14 @@ class VideoPlayer:
             '--http-port', '8080',
             '--fullscreen' if self.is_fullscreen else '--no-fullscreen',
             '--no-video-title-show',
-            '--quiet'
+            '--quiet',
+            '--network-caching=300',
+            '--file-caching=300',
+            '--live-caching=300',
+            '--sout-mux-caching=300',
+            '--cr-average=40',
+            '--drop-late-frames',
+            '--skip-frames'
         ]
         
         if start_time > 0:
