@@ -5,6 +5,7 @@ from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.logger import Logger
+from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
@@ -19,11 +20,66 @@ from youtube_api import YouTubeAPI
 kivy.require("2.0.0")
 
 
+class NavItem(ButtonBehavior, BoxLayout):
+    def __init__(self, icon, text, **kwargs):
+        super().__init__(**kwargs)
+        self.orientation = "horizontal"
+        self.size_hint_y = None
+        self.height = 48
+        self.padding = [20, 8, 16, 8]
+        self.spacing = 12
+
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+
+            Color(0, 0, 0, 0)
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+
+        self.bind(pos=self.update_bg, size=self.update_bg)
+
+        icon_label = Label(
+            text=icon,
+            size_hint_x=None,
+            width=32,
+            color=(0.067, 0.067, 0.067, 1),
+            font_size="18sp",
+        )
+        text_label = Label(
+            text=text,
+            halign="left",
+            valign="center",
+            color=(0.067, 0.067, 0.067, 1),
+            font_size="15sp",
+        )
+        text_label.bind(size=text_label.setter("text_size"))
+
+        self.add_widget(icon_label)
+        self.add_widget(text_label)
+
+    def update_bg(self, instance, value):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
+
+    def set_active(self, active):
+        self.canvas.before.clear()
+        with self.canvas.before:
+            from kivy.graphics import Color, Rectangle
+
+            if active:
+                Color(0.9, 0.9, 0.9, 1)
+            else:
+                Color(0, 0, 0, 0)
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+
+
 class RaspyTubeApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.youtube_api = YouTubeAPI()
         self.video_player = VideoPlayer()
+        self.video_history = []
+        self.current_view = "home"
+        self.nav_buttons = {}
 
     def build(self):
         Window.size = (1024, 600)
@@ -134,31 +190,16 @@ class RaspyTubeApp(App):
         ]
 
         for icon, text in sidebar_items:
-            item_layout = BoxLayout(
-                orientation="horizontal",
-                size_hint_y=None,
-                height=48,
-                padding=[20, 8, 16, 8],
-                spacing=12,
+            nav_item = NavItem(icon, text)
+            nav_item.bind(
+                on_press=lambda x, nav_type=text.lower(): self.on_nav_click(nav_type)
             )
-            icon_label = Label(
-                text=icon,
-                size_hint_x=None,
-                width=32,
-                color=(0.067, 0.067, 0.067, 1),
-                font_size="18sp",
-            )
-            text_label = Label(
-                text=text,
-                halign="left",
-                valign="center",
-                color=(0.067, 0.067, 0.067, 1),
-                font_size="15sp",
-            )
-            text_label.bind(size=text_label.setter("text_size"))
-            item_layout.add_widget(icon_label)
-            item_layout.add_widget(text_label)
-            sidebar.add_widget(item_layout)
+
+            self.nav_buttons[text.lower()] = nav_item
+            if text.lower() == "home":
+                nav_item.set_active(True)
+
+            sidebar.add_widget(nav_item)
 
         main_content = BoxLayout(orientation="vertical", padding=[24, 12, 24, 0])
 
@@ -212,10 +253,47 @@ class RaspyTubeApp(App):
 
     def play_video(self, video_card, video_data):
         try:
+            self.video_history.append(video_data)
             self.video_player.play_video(video_data["video_id"])
         except Exception as e:
             Logger.error(f"Video playback error: {e}")
             self.show_error("Failed to play video.")
+
+    def on_nav_click(self, nav_type):
+        self.current_view = nav_type
+        Logger.info(f"Navigation clicked: {nav_type}")
+
+        for name, nav_item in self.nav_buttons.items():
+            nav_item.set_active(name == nav_type)
+
+        if nav_type == "home":
+            self.load_home_videos()
+        elif nav_type == "trending":
+            self.load_trending_videos(None)
+        elif nav_type == "history":
+            self.load_history_videos()
+
+    def load_home_videos(self):
+        try:
+            videos = self.youtube_api.get_trending_videos()
+            self.display_videos(videos)
+        except Exception as e:
+            Logger.error(f"Home videos error: {e}")
+            self.show_error("Failed to load home videos.")
+
+    def load_history_videos(self):
+        if not self.video_history:
+            self.video_grid.clear_widgets()
+            no_history_label = Label(
+                text="No videos in history yet.\nWatch some videos to see them here!",
+                color=(0.4, 0.4, 0.4, 1),
+                font_size="16sp",
+                halign="center",
+            )
+            self.video_grid.add_widget(no_history_label)
+        else:
+            recent_history = list(reversed(self.video_history[-20:]))
+            self.display_videos(recent_history)
 
     def show_error(self, message):
         popup = Popup(title="Error", content=Label(text=message), size_hint=(0.6, 0.4))
