@@ -293,8 +293,22 @@ class RaspyTubeApp(MDApp):
             else 1
         )
         self.page_label.text = f"Page {self.current_page} of {total_pages}"
-        self.prev_button.disabled = self.current_page <= 1
-        self.next_button.disabled = self.current_page >= total_pages
+
+        # Update previous button appearance
+        if self.current_page <= 1:
+            self.prev_button.background_color = (0.5, 0.5, 0.5, 1)
+            self.prev_button.color = (0.7, 0.7, 0.7, 1)
+        else:
+            self.prev_button.background_color = (0.2, 0.4, 0.8, 1)
+            self.prev_button.color = (1, 1, 1, 1)
+
+        # Update next button appearance
+        if self.current_page >= total_pages:
+            self.next_button.background_color = (0.5, 0.5, 0.5, 1)
+            self.next_button.color = (0.7, 0.7, 0.7, 1)
+        else:
+            self.next_button.background_color = (0.2, 0.4, 0.8, 1)
+            self.next_button.color = (1, 1, 1, 1)
 
     def prev_page(self, instance):
         if self.current_page > 1:
