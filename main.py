@@ -215,11 +215,15 @@ class RaspyTubeApp(MDApp):
         )
         self.next_button.bind(on_press=self.next_page)
 
+        # Add spacers to center the pagination controls
+        left_spacer = Label(text="")
+        right_spacer = Label(text="")
+
+        self.pagination_layout.add_widget(left_spacer)
         self.pagination_layout.add_widget(self.prev_button)
         self.pagination_layout.add_widget(self.page_label)
         self.pagination_layout.add_widget(self.next_button)
-        spacer = Label(text="")
-        self.pagination_layout.add_widget(spacer)
+        self.pagination_layout.add_widget(right_spacer)
 
         main_content.add_widget(scroll_view)
         main_content.add_widget(self.pagination_layout)
