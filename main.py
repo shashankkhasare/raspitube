@@ -82,7 +82,7 @@ class RaspyTubeApp(MDApp):
         self.nav_buttons = {}
 
     def build(self):
-        Window.size = (1024, 600)
+        Window.maximize()
         Window.clearcolor = (1, 1, 1, 1)
 
         main_layout = BoxLayout(orientation="vertical", spacing=0, padding=0)

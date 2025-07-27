@@ -79,29 +79,22 @@ class VideoCard(ButtonBehavior, BoxLayout):
         thumbnail_container.add_widget(self.thumbnail)
 
         info_container = BoxLayout(
-            orientation="horizontal",
+            orientation="vertical",
             size_hint_y=None,
             height=dp(88),
-            spacing=dp(12),
+            spacing=dp(4),
             padding=[0, 0, 0, 0],
         )
 
-        channel_avatar = Label(
-            text="👤",
-            size_hint_x=None,
-            width=dp(36),
-            font_size="20sp",
-            color=(0.4, 0.4, 0.4, 1),
-        )
-
-        text_container = BoxLayout(orientation="vertical", spacing=dp(4))
-
         title = video_data.get("title", "No title")
+        # Limit title to 60 characters and wrap
+        if len(title) > 60:
+            title = title[:57] + "..."
         wrapped_title = "\n".join(textwrap.wrap(title, width=25))
 
         self.title_label = Label(
             text=wrapped_title,
-            text_size=(None, None),
+            text_size=(dp(180), dp(40)),
             halign="left",
             valign="top",
             color=(0.067, 0.067, 0.067, 1),
@@ -115,7 +108,7 @@ class VideoCard(ButtonBehavior, BoxLayout):
 
         self.channel_label = Label(
             text=channel_name,
-            text_size=(None, None),
+            text_size=(dp(180), None),
             halign="left",
             valign="top",
             color=(0.4, 0.4, 0.4, 1),
@@ -126,7 +119,7 @@ class VideoCard(ButtonBehavior, BoxLayout):
 
         self.view_label = Label(
             text=f"{view_count} views",
-            text_size=(None, None),
+            text_size=(dp(180), None),
             halign="left",
             valign="top",
             color=(0.4, 0.4, 0.4, 1),
@@ -135,12 +128,9 @@ class VideoCard(ButtonBehavior, BoxLayout):
             height=dp(20),
         )
 
-        text_container.add_widget(self.title_label)
-        text_container.add_widget(self.channel_label)
-        text_container.add_widget(self.view_label)
-
-        info_container.add_widget(channel_avatar)
-        info_container.add_widget(text_container)
+        info_container.add_widget(self.title_label)
+        info_container.add_widget(self.channel_label)
+        info_container.add_widget(self.view_label)
 
         self.add_widget(thumbnail_container)
         self.add_widget(info_container)
