@@ -133,16 +133,20 @@ class RaspyTubeApp(MDApp):
         logo_layout.add_widget(logo_label)
 
         search_container = BoxLayout(
-            orientation="horizontal", size_hint_x=0.4, spacing=0
+            orientation="horizontal", size_hint_x=None, width=400, spacing=0
         )
         self.search_bar = SearchBar()
         self.search_bar.bind(on_search=self.on_search)
         search_container.add_widget(self.search_bar)
 
+        # Add spacers to center the search bar like pagination
+        left_search_spacer = Label(text="")
+        right_search_spacer = Label(text="")
+
         header_layout.add_widget(logo_layout)
-        header_layout.add_widget(Label(text="", size_hint_x=0.3))
+        header_layout.add_widget(left_search_spacer)
         header_layout.add_widget(search_container)
-        header_layout.add_widget(Label(text="", size_hint_x=0.6))
+        header_layout.add_widget(right_search_spacer)
 
         content_layout = BoxLayout(orientation="horizontal", spacing=0)
 
