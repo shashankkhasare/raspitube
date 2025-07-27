@@ -1,4 +1,4 @@
 kivy>=2.1.0
-yt-dlp>=2023.12.30
+yt-dlp>=2025.07.21
 requests>=2.31.0
 Pillow>=10.0.0
