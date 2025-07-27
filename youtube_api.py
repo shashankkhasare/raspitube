@@ -48,9 +48,16 @@ class YouTubeAPI:
             videos = []
 
             for item in data.get("items", []):
-                video = self._parse_video_item(item)
-                if video:
-                    videos.append(video)
+                try:
+                    if isinstance(item, dict):
+                        video = self._parse_video_item(item)
+                        if video:
+                            videos.append(video)
+                    else:
+                        Logger.warning(f"Unexpected item type: {type(item)} - {item}")
+                except Exception as e:
+                    Logger.error(f"Error parsing video item: {e} - Item: {item}")
+                    continue
 
             return videos
 
@@ -86,9 +93,16 @@ class YouTubeAPI:
             videos = []
 
             for item in data.get("items", []):
-                video = self._parse_video_item(item, include_stats=True)
-                if video:
-                    videos.append(video)
+                try:
+                    if isinstance(item, dict):
+                        video = self._parse_video_item(item, include_stats=True)
+                        if video:
+                            videos.append(video)
+                    else:
+                        Logger.warning(f"Unexpected item type: {type(item)} - {item}")
+                except Exception as e:
+                    Logger.error(f"Error parsing video item: {e} - Item: {item}")
+                    continue
 
             return videos
 
@@ -131,10 +145,29 @@ class YouTubeAPI:
     def _parse_video_item(
         self, item: Dict, include_stats: bool = False, include_details: bool = False
     ) -> Dict:
+        if not isinstance(item, dict):
+            Logger.error(f"Expected dict but got {type(item)}: {item}")
+            return {}
+
         snippet = item.get("snippet", {})
+        if not isinstance(snippet, dict):
+            Logger.error(f"Expected snippet dict but got {type(snippet)}: {snippet}")
+            return {}
+
+        # Get video_id safely
+        video_id = None
+        if "id" in item:
+            if isinstance(item["id"], dict):
+                video_id = item["id"].get("videoId")
+            else:
+                video_id = item["id"]
+
+        if not video_id:
+            Logger.warning(f"No video_id found in item: {item}")
+            return {}
 
         video_data = {
-            "video_id": item.get("id", {}).get("videoId") or item.get("id"),
+            "video_id": video_id,
             "title": snippet.get("title", "No title"),
             "channel_name": snippet.get("channelTitle", "Unknown Channel"),
             "channel_id": snippet.get("channelId", ""),

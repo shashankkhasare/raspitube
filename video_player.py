@@ -9,6 +9,20 @@ from kivy.clock import Clock
 from kivy.logger import Logger
 
 
+class YtDlpLogger:
+    def debug(self, msg):
+        Logger.debug(f"yt-dlp: {msg}")
+
+    def info(self, msg):
+        Logger.info(f"yt-dlp: {msg}")
+
+    def warning(self, msg):
+        Logger.warning(f"yt-dlp: {msg}")
+
+    def error(self, msg):
+        Logger.error(f"yt-dlp: {msg}")
+
+
 class VideoPlayer:
     def __init__(self, preferred_player="vlc"):
         self.preferred_player = preferred_player
@@ -20,13 +34,17 @@ class VideoPlayer:
         self.player_socket = None
 
         self.ydl_opts = {
-            "format": "best[height<=720]/best",
-            "quiet": True,
-            "no_warnings": True,
+            "format": "best[height<=720][ext=mp4]/best[ext=mp4]/best",
+            "quiet": False,
+            "no_warnings": False,
             "extractaudio": False,
             "audioformat": "mp3",
             "outtmpl": "%(id)s.%(ext)s",
             "ignoreerrors": True,
+            "logger": YtDlpLogger(),
+            "no_color": True,
+            "age_limit": 18,
+            "geo_bypass": True,
         }
 
     def play_video(self, video_id: str, start_time: int = 0):
@@ -55,17 +73,70 @@ class VideoPlayer:
             with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
                 info = ydl.extract_info(youtube_url, download=False)
 
+                if not info:
+                    Logger.error("No video info extracted")
+                    return None
+
+                # Try different format selection strategies
                 formats = info.get("formats", [])
 
-                for fmt in formats:
-                    if fmt.get("vcodec") != "none" and fmt.get("acodec") != "none":
-                        if fmt.get("height", 0) <= 720:
-                            return fmt["url"]
+                if not formats:
+                    Logger.error("No formats available")
+                    return None
 
-                if formats:
+                # Strategy 1: Look for mp4 with both video and audio, height <= 720
+                for fmt in formats:
+                    if (
+                        fmt.get("ext") == "mp4"
+                        and fmt.get("vcodec") != "none"
+                        and fmt.get("acodec") != "none"
+                        and fmt.get("height", 0) <= 720
+                        and fmt.get("url")
+                    ):
+                        Logger.info(
+                            f"Selected format: {fmt.get('format_id')} - {fmt.get('height')}p"
+                        )
+                        return fmt["url"]
+
+                # Strategy 2: Look for any mp4 with both video and audio
+                for fmt in formats:
+                    if (
+                        fmt.get("ext") == "mp4"
+                        and fmt.get("vcodec") != "none"
+                        and fmt.get("acodec") != "none"
+                        and fmt.get("url")
+                    ):
+                        Logger.info(
+                            f"Selected format: {fmt.get('format_id')} - {fmt.get('height')}p"
+                        )
+                        return fmt["url"]
+
+                # Strategy 3: Look for any format with both video and audio
+                for fmt in formats:
+                    if (
+                        fmt.get("vcodec") != "none"
+                        and fmt.get("acodec") != "none"
+                        and fmt.get("url")
+                    ):
+                        Logger.info(
+                            f"Selected format: {fmt.get('format_id')} - {fmt.get('height')}p"
+                        )
+                        return fmt["url"]
+
+                # Strategy 4: Use the first available format
+                if formats and formats[0].get("url"):
+                    Logger.info(
+                        f"Using first available format: {formats[0].get('format_id')}"
+                    )
                     return formats[0]["url"]
 
-                return info.get("url")
+                # Strategy 5: Try the direct URL from info
+                if info.get("url"):
+                    Logger.info("Using direct URL from info")
+                    return info["url"]
+
+                Logger.error("No suitable format found")
+                return None
 
         except Exception as e:
             Logger.error(f"yt-dlp error: {e}")
