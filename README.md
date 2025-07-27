@@ -1,4 +1,8 @@
-# RaspyTube
+# RaspiTube
+
+<p align="center">
+  <img src="logo.png" alt="RaspiTube Logo" width="100">
+</p>
 
 A desktop YouTube application for Raspberry Pi with a YouTube.com-like interface.
 
@@ -39,7 +43,7 @@ pip3 install -r requirements.txt
 1. **Clone or download this repository:**
    ```bash
    git clone <repository-url>
-   cd raspytube
+   cd raspitube
    ```
 
 2. **Install dependencies:**

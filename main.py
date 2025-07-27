@@ -8,6 +8,7 @@ from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.scrollview import ScrollView
@@ -104,7 +105,7 @@ class RaspiTubeApp(MDApp):
             Rectangle(pos=header_layout.pos, size=header_layout.size)
 
         logo_layout = BoxLayout(
-            orientation="horizontal", size_hint_x=None, width=150, spacing=8
+            orientation="horizontal", size_hint_x=None, width=200, spacing=8
         )
 
         menu_button = Button(
@@ -120,17 +121,38 @@ class RaspiTubeApp(MDApp):
         )
         menu_button.add_widget(menu_icon)
 
+        # Clickable logo container
+        class ClickableLogoContainer(ButtonBehavior, BoxLayout):
+            pass
+
+        logo_container = ClickableLogoContainer(
+            orientation="horizontal", size_hint_x=None, width=150, spacing=8
+        )
+        logo_container.bind(on_press=self.go_to_home)
+
+        # Logo image
+        logo_image = Image(
+            source="logo.png",
+            size_hint_x=None,
+            width=32,
+            allow_stretch=True,
+            keep_ratio=True,
+        )
+
         logo_label = Label(
             text="RaspiTube",
             font_size="20sp",
             color=(0.067, 0.067, 0.067, 1),
             size_hint_x=None,
-            width=100,
+            width=110,
             bold=True,
         )
 
+        logo_container.add_widget(logo_image)
+        logo_container.add_widget(logo_label)
+
         logo_layout.add_widget(menu_button)
-        logo_layout.add_widget(logo_label)
+        logo_layout.add_widget(logo_container)
 
         search_container = BoxLayout(
             orientation="horizontal", size_hint_x=None, width=400, spacing=0
@@ -332,6 +354,10 @@ class RaspiTubeApp(MDApp):
         except Exception as e:
             Logger.error(f"Video playback error: {e}")
             self.show_error("Failed to play video.")
+
+    def go_to_home(self, instance):
+        """Navigate to home/landing page when logo is clicked"""
+        self.on_nav_click("home")
 
     def on_nav_click(self, nav_type):
         self.current_view = nav_type
