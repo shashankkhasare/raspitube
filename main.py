@@ -176,6 +176,10 @@ class RaspyTubeApp(MDApp):
 
             sidebar.add_widget(nav_item)
 
+        # Add spacer to push navigation items to the top
+        sidebar_spacer = Label(text="")
+        sidebar.add_widget(sidebar_spacer)
+
         main_content = BoxLayout(orientation="vertical", padding=[24, 12, 24, 0])
 
         self.video_grid = GridLayout(
